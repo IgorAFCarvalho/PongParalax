@@ -1,5 +1,10 @@
 # PongParalax
 Dimensões de fundo 1080x720px
+Pontos do Campo
+1. (20,20)
+2. (50,520)
+3. (1030,520)
+4. (1060,20)
                        _,aaadP""""""Ybaaaa,,_
                    ,adP,__,,,aaaadP"""""Y888888a,_
                 ,a8888888P"''             "Y8888888b,
