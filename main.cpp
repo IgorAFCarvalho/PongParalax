@@ -4,11 +4,11 @@
 
 #include <windows.h>
 #include <gl/glut.h>
+#include <math.h>
+#include <stdio.h>
 
 // Tamanho e posição inicial do quadrado
-GLfloat x1 = 100.0f;
-GLfloat y1 = 150.0f;
-GLsizei rsize = 50;
+
 
 // Tamanho do incremento nas direções x e y
 // (número de pixels para se mover a cada
@@ -20,6 +20,61 @@ GLfloat ystep = 1.0f;
 GLfloat windowWidth;
 GLfloat windowHeight;
 
+float x1_ = 30.0f;
+float y1_ = 120.0f;
+float rsize = 32.0f;
+
+
+void DrawBall(void) {
+
+    printf(" (%.1f,  %.1f)", x1_, y1_);
+
+    // Draw a circle
+     glColor3f(0.0f, 1.0f, 0.0f);
+     glBegin(GL_POLYGON);
+     for (int i = 0; i < 360; i++)
+     {
+         float theta = i * 3.14159 / 180;
+         float x = x1_ + rsize/2 * cos(theta);
+         float y = y1_ + rsize/2 * sin(theta);
+         glVertex2f(x, y);
+     }
+     glEnd();
+}
+
+void DrawBackground(void) {
+    // Draw a circle
+     glColor3f(1.0f, 0.0f, 0.0f);
+
+     // Desenha um quadrado preenchido com a cor corrente
+     glBegin(GL_QUADS);
+               glVertex2i(0,0);
+               glVertex2i(windowWidth,0);
+               glVertex2i(windowWidth,windowHeight);
+
+               // Especifica que a cor corrente é azul
+               glColor3f(0.0f, 0.0f, 1.0f);
+               glVertex2i(0, windowHeight);
+
+     glEnd();
+}
+
+void DrawField(void) {
+    // Draw a circle
+     glColor3f(1.0f, 1.0f, 1.0f);
+
+     // Desenha um quadrado preenchido com a cor corrente
+     glBegin(GL_QUADS);
+               glVertex2i(20, 20);
+               glVertex2i(50, 520);
+               glVertex2i(1030, 520);
+
+               // Especifica que a cor corrente é azul
+               glColor3f(0.0f, 0.0f, 1.0f);
+               glVertex2i(1060, 20);
+
+     glEnd();
+}
 
 // Função callback chamada para fazer o desenho
 void Desenha(void)
@@ -30,19 +85,11 @@ void Desenha(void)
      // Limpa a janela de visualização com a cor de fundo especificada
      glClear(GL_COLOR_BUFFER_BIT);
 
-     // Especifica que a cor corrente é vermelha
-     //         R     G     B
      glColor3f(1.0f, 0.0f, 0.0f);
 
-     // Desenha um quadrado preenchido com a cor corrente
-     glBegin(GL_QUADS);
-               glVertex2i(x1,y1+rsize);
-               glVertex2i(x1,y1);
-               // Especifica que a cor corrente é azul
-               glColor3f(0.0f, 0.0f, 1.0f);
-               glVertex2i(x1+rsize,y1);
-               glVertex2i(x1+rsize,y1+rsize);
-     glEnd();
+     DrawBackground();
+     DrawField();
+     DrawBall();
 
      // Executa os comandos OpenGL
      glutSwapBuffers();
@@ -53,28 +100,28 @@ void Desenha(void)
 void Timer(int value)
 {
     // Muda a direção quando chega na borda esquerda ou direita
-      if(x1 > windowWidth-rsize || x1 < 0)
+      if(x1_> windowWidth-rsize || x1_< 0)
             xstep = -xstep;
 
     // Muda a direção quando chega na borda superior ou inferior
-    if(y1 > windowHeight-rsize || y1 < 0)
+    if(y1_ > windowHeight-rsize- (0.25*windowHeight) || y1_ < 0)
           ystep = -ystep;
 
     // Verifica as bordas.  Se a window for menor e o
     // quadrado sair do volume de visualização
-   if(x1 > windowWidth-rsize)
-         x1 = windowWidth-rsize-1;
+   if(x1_> windowWidth-rsize)
+         x1_= windowWidth-rsize-1;
 
-   if(y1 > windowHeight-rsize)
-         y1 = windowHeight-rsize-1;
+   if(y1_ > windowHeight-rsize)
+         y1_ = windowHeight-rsize-1;
 
     // Move o quadrado
-    x1 += xstep;
-    y1 += ystep;
+    x1_+= xstep;
+    y1_ += ystep;
 
     // Redesenha o quadrado com as novas coordenadas
     glutPostRedisplay();
-    glutTimerFunc(33,Timer, 1);
+    glutTimerFunc(5,Timer, 1);
 }
 
 // Inicializa parâmetros de rendering
@@ -99,12 +146,12 @@ void AlteraTamanhoJanela(GLsizei w, GLsizei h)
 
      // Estabelece a janela de seleção (left, right, bottom, top)
      if (w <= h)  {
-		windowHeight = 250.0f*h/w;
-		windowWidth = 250.0f;
+		windowHeight = 720.0f*h/w;
+		windowWidth = 1080.0f;
      }
      else  {
-		windowWidth = 250.0f*w/h;
-		windowHeight = 250.0f;
+		windowWidth = 1080.0f;
+		windowHeight = 720.0f;
      }
 
      gluOrtho2D(0.0f, windowWidth, 0.0f, windowHeight);
@@ -114,8 +161,8 @@ void AlteraTamanhoJanela(GLsizei w, GLsizei h)
 int main(void)
 {
      glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB);
-     glutInitWindowSize(800,800);
-     glutInitWindowPosition(0,0);
+     glutInitWindowSize(1080, 720);
+     glutInitWindowPosition(0.0,0.0);
      glutCreateWindow("Anima");
      glutDisplayFunc(Desenha);
      glutReshapeFunc(AlteraTamanhoJanela);
