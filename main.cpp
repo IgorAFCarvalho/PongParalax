@@ -15,9 +15,16 @@ GLfloat windowHeight = 720.0f;
 float ball_x = 0.0f;
 float ball_y = 0.0f;
 
+float score_player_left = 0.0f;
+float score_player_right = 0.0f;
+
+float goals_center_y = 250.0f;
+float goal_size = 120.0f;
+
+
 // Position and size of the bars
 GLfloat barWidth = 12.0f;
-GLfloat barHeight = 120.0f;
+GLfloat barHeight = 140.0f;
 GLfloat bar1_x = 50.0f;
 GLfloat bar1_y = 350.0f;
 GLfloat bar2_x = windowWidth - barWidth - 50.0f;
@@ -28,6 +35,19 @@ float x1_ = 50.0f;
 float y1_ = 120.0f;
 float rsize = 28.0f;
 
+void delay(int v)
+{
+	glColor3f(1.0f, 1.0f, 0.0f);
+	glRectf(-90.0f, 90.0f, -10.0f, 10.0f);
+	glutPostRedisplay();
+	glutTimerFunc(1000, delay, v);
+}
+
+void reset_ball() {
+    delay(2000);
+    x1_ = windowWidth/2;
+    y1_ = 120.0f;
+}
 
 void DrawBar1(void) {
    // Draw bar 1
@@ -86,10 +106,25 @@ void KeyboardHandler(unsigned char key, int x, int y)
    if (bar2_y > windowHeight-rsize- (0.24*windowHeight) - barHeight) bar2_y = windowHeight-rsize- (0.24*windowHeight) - barHeight;
 }
 
+int check_for_goal(float x_ball, float y_ball) {
+
+    if ((y_ball >= goals_center_y - goal_size ) && y_ball <= (goals_center_y + goal_size) && x_ball < bar1_x + rsize - 12) {
+        printf("%f \n", ball_y);
+        return 1;
+    }
+
+    else if ((y_ball >= goals_center_y - goal_size ) && y_ball <= (goals_center_y + goal_size) && x_ball > bar2_x + 12) {
+        printf("%f \n", ball_y);
+        return 2;
+    }
+
+    return 0;
+
+}
 
 int collided_with_bar(float x_ball, float y_ball) {
 
-    if (y_ball >= bar1_y && y_ball <= (bar1_y + barHeight) && x_ball <= bar1_x + rsize + 5) {
+    if (y_ball >= bar1_y && y_ball <= (bar1_y + barHeight) && x_ball <= bar1_x + rsize) {
         return 1;
     }
 
@@ -180,6 +215,10 @@ void Timer(int value)
 {
 
     GLfloat collision = 0.0f;
+    GLfloat goal = 0.0f;
+
+    collision = collided_with_bar(ball_x, ball_y);
+    goal = check_for_goal(ball_x, ball_y);
 
     if(x1_> windowWidth-rsize-15 || x1_< 40)
             xstep = -xstep;
@@ -187,30 +226,38 @@ void Timer(int value)
     if(y1_ > windowHeight-rsize- (0.25*windowHeight) || y1_ < 30)
           ystep = -ystep;
 
-
     if(x1_> windowWidth-rsize)
          x1_= windowWidth-rsize-1;
 
     if(y1_ > windowHeight-rsize)
          y1_ = windowHeight-rsize-1;
 
-    collision = collided_with_bar(ball_x, ball_y);
+
+
+    if (goal == 1) {
+        printf("Gol da direita");
+        reset_ball();
+    }
+
+    if (goal == 2) {
+        printf("Gol da esquerda");
+        reset_ball();
+    }
 
     if (collision == 1) {
-        printf("left\n");
         xstep = -xstep;
     }
 
-    else if (collision == 2) {
-        printf("right\n");
+    if (collision == 2) {
         xstep = -xstep;
     }
 
     x1_ += 7*xstep;
-    y1_ +=7*ystep;
+    y1_ += 7*ystep;
 
     glutPostRedisplay();
     glutTimerFunc(1, Timer, 1);
+
 }
 
 void Inicializa (void)
