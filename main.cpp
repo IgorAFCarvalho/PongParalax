@@ -90,6 +90,8 @@ void loadTextures(){
     printf("1");
     loadTexture = false;
     }
+}
+
 void delay(int v)
 {
 	glColor3f(1.0f, 1.0f, 0.0f);
@@ -234,12 +236,12 @@ void DrawField(void) {
     glBindTexture(GL_TEXTURE_2D,fieldTexture);
 
     glBegin(GL_QUADS);
-        glTexCoord2f(0.0f, 0.0f); glVertex2i(20, 20);
-        glTexCoord2f(0.0f, 1.0f); glVertex2i(50, 520);
-        glTexCoord2f(1.0f, 1.0f); glVertex2i(1030, 520);
-        glTexCoord2f(1.0f, 0.0f); glVertex2i(1060, 20);
+        glTexCoord2f(1.0f, 1.0f); glVertex2i(0, 0);
+        glTexCoord2f(1.0f, 0.0f); glVertex2i(0, 520);
+        glTexCoord2f(0.0f, 0.0f); glVertex2i(1080, 520);
+        glTexCoord2f(0.0f, 1.0f); glVertex2i(1080, 0);
 
-        // Define a reflet�ncia do material
+    // Define a reflet�ncia do material
     glMaterialfv(GL_FRONT,GL_SPECULAR, especularidade);
     // Define a concentra��o do brilho
     glMateriali(GL_FRONT,GL_SHININESS,especMaterial);
