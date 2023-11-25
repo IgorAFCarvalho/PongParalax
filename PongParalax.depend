@@ -209,7 +209,7 @@
 1301111156 c:\program files (x86)\codeblocks\mingw\include\oleidl.h
 	<objfwd.h>
 
-976677772 c:\program files (x86)\codeblocks\mingw\include\gl\glut.h
+976674172 c:\program files (x86)\codeblocks\mingw\include\gl\glut.h
 	<windows.h>
 	<GL/gl.h>
 	<GL/glu.h>
@@ -232,4 +232,10 @@
 1341006780 c:\program files (x86)\codeblocks\mingw\include\sys\types.h
 	<_mingw.h>
 	<stddef.h>
+
+1700933394 source:c:\users\paulo\desktop\pongparalax\main.cpp
+	<windows.h>
+	<gl/glut.h>
+	<math.h>
+	<stdio.h>
 

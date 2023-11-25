@@ -20,14 +20,12 @@ GLfloat ystep = 1.0f;
 GLfloat windowWidth;
 GLfloat windowHeight;
 
-float x1_ = 30.0f;
+float x1_ = 50.0f;
 float y1_ = 120.0f;
-float rsize = 32.0f;
+float rsize = 28.0f;
 
 
 void DrawBall(void) {
-
-    printf(" (%.1f,  %.1f)", x1_, y1_);
 
     // Draw a circle
      glColor3f(0.0f, 1.0f, 0.0f);
@@ -100,11 +98,11 @@ void Desenha(void)
 void Timer(int value)
 {
     // Muda a direção quando chega na borda esquerda ou direita
-      if(x1_> windowWidth-rsize || x1_< 0)
+      if(x1_> windowWidth-rsize-15 || x1_< 40)
             xstep = -xstep;
 
     // Muda a direção quando chega na borda superior ou inferior
-    if(y1_ > windowHeight-rsize- (0.25*windowHeight) || y1_ < 0)
+    if(y1_ > windowHeight-rsize- (0.25*windowHeight) || y1_ < 30)
           ystep = -ystep;
 
     // Verifica as bordas.  Se a window for menor e o
@@ -116,8 +114,8 @@ void Timer(int value)
          y1_ = windowHeight-rsize-1;
 
     // Move o quadrado
-    x1_+= xstep;
-    y1_ += ystep;
+    x1_+= 7*xstep;
+    y1_ +=7*ystep;
 
     // Redesenha o quadrado com as novas coordenadas
     glutPostRedisplay();
