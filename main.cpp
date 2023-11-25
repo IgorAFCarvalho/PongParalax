@@ -1,9 +1,13 @@
-
-
 #include <windows.h>
 #include <gl/glut.h>
 #include <math.h>
 #include <stdio.h>
+#include <iostream>
+#include <fstream>
+#include <vector>
+
+#define STB_IMAGE_IMPLEMENTATION
+#include "stb_image.h"
 
 
 GLfloat xstep = 1.0f;
@@ -23,11 +27,63 @@ GLfloat bar1_y = 350.0f;
 GLfloat bar2_x = windowWidth - barWidth - 50.0f;
 GLfloat bar2_y = 350.0f;
 
-
 float x1_ = 50.0f;
 float y1_ = 120.0f;
 float rsize = 28.0f;
 
+GLuint fieldTexture;
+
+bool loadTexture = true;
+
+float lightX, lightY = 0.0;
+float lightZ = 40;
+    GLfloat luzAmbiente[4] = {0.5,0.5,0.5,1.0};
+    GLfloat luzDifusa[4] = {0.7,0.7,0.7,1.0};
+    GLfloat luzEspecular[4] = {1.0,1.0,1.0,1.0};
+    GLfloat posicaoLuz[4] = {lightX, lightY, lightZ, 1.0};
+
+GLuint loadImage(const char *imagepath){
+    GLuint textureID;
+    int width, height, nrComponents;
+    unsigned char *data = stbi_load(imagepath, &width, &height, &nrComponents, 0);
+    if (data)
+    {
+        GLenum format;
+        if (nrComponents == 1)
+            format = GL_RED;
+        else if (nrComponents == 3)
+            format = GL_RGB;
+        else if (nrComponents == 4)
+            format = GL_RGBA;
+
+        glGenTextures(1, &textureID);
+        glBindTexture(GL_TEXTURE_2D, textureID);
+        glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
+        gluBuild2DMipmaps(GL_TEXTURE_2D, GL_RGB, width, height, GL_RGB, GL_UNSIGNED_BYTE, data);
+
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+        stbi_image_free(data);
+    }
+    else
+    {
+        std::cout << "Texture failed to load at path: " << imagepath << std::endl;
+        stbi_image_free(data);
+    }
+
+    return textureID;
+}
+
+void loadTextures(){
+    if(loadTexture){
+    fieldTexture = loadImage("C:\\Workspace\\PongParalax\\Campo.png");
+    printf("1");
+    loadTexture = false;
+    }
+}
 
 void DrawBar1(void) {
    // Draw bar 1
@@ -124,7 +180,6 @@ void DrawBall(void) {
 }
 
 void DrawBackground(void) {
-    // Draw a circle
      glColor3f(1.0f, 0.0f, 0.0f);
 
      glBegin(GL_QUADS);
@@ -139,25 +194,30 @@ void DrawBackground(void) {
 }
 
 void DrawField(void) {
+    glColor3f(1.0f, 1.0f, 1.0f);
+    GLfloat especularidade[4]={1.0,1.0,1.0,1.0};
+    GLint especMaterial = 60;
+    glBindTexture(GL_TEXTURE_2D,fieldTexture);
 
-     glColor3f(1.0f, 1.0f, 1.0f);
+    glBegin(GL_QUADS);
+        glTexCoord2f(0.0f, 0.0f); glVertex2i(20, 20);
+        glTexCoord2f(0.0f, 1.0f); glVertex2i(50, 520);
+        glTexCoord2f(1.0f, 1.0f); glVertex2i(1030, 520);
+        glTexCoord2f(1.0f, 0.0f); glVertex2i(1060, 20);
 
-     glBegin(GL_QUADS);
-               glVertex2i(20, 20);
-               glVertex2i(50, 520);
-               glVertex2i(1030, 520);
-
-               glColor3f(0.0f, 0.0f, 1.0f);
-               glVertex2i(1060, 20);
-
-     glEnd();
+        // Define a refletância do material
+    glMaterialfv(GL_FRONT,GL_SPECULAR, especularidade);
+    // Define a concentração do brilho
+    glMateriali(GL_FRONT,GL_SHININESS,especMaterial);
+    glEnd();
+    glBindTexture(GL_TEXTURE_2D,0);
 }
 
 
 
 void Desenha(void)
 {
-
+     glEnable(GL_TEXTURE_2D);
      glMatrixMode(GL_MODELVIEW);
      glLoadIdentity();
 
@@ -166,11 +226,22 @@ void Desenha(void)
      glColor3f(1.0f, 0.0f, 0.0f);
 
      DrawBackground();
+
      DrawField();
+
      DrawBall();
 
      DrawBar1();
      DrawBar2();
+
+     glDisable(GL_TEXTURE_2D);
+
+     GLenum error = glGetError();
+    if (error != GL_NO_ERROR) {
+        printf("OpenGL error: %s\n", gluErrorString(error));
+    }
+
+    loadTextures();
 
      glutSwapBuffers();
 }
@@ -216,6 +287,20 @@ void Timer(int value)
 void Inicializa (void)
 {
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+
+    // Define os parâmetros da luz de número 0
+    glLightModelfv(GL_LIGHT_MODEL_AMBIENT, luzAmbiente);
+    glLightfv(GL_LIGHT0, GL_AMBIENT, luzAmbiente);
+    glLightfv(GL_LIGHT0, GL_DIFFUSE, luzDifusa );
+    //glLightfv(GL_LIGHT0, GL_SPECULAR, luzEspecular );
+    glLightfv(GL_LIGHT0, GL_POSITION, posicaoLuz );
+
+    // Habilita a definição da cor do material a partir da cor corrente
+    glEnable(GL_COLOR_MATERIAL);
+    //Habilita o uso de iluminação
+    glEnable(GL_LIGHTING);
+    // Habilita a luz de número 0
+    glEnable(GL_LIGHT0);
 }
 
 void AlteraTamanhoJanela(GLsizei w, GLsizei h)
