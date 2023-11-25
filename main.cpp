@@ -1,42 +1,125 @@
-// Anima.c -
-// Um programa OpenGL simples que mostra a animação
-// de quadrado em  uma janela GLUT.
+
 
 #include <windows.h>
 #include <gl/glut.h>
 #include <math.h>
 #include <stdio.h>
 
-// Tamanho e posição inicial do quadrado
 
-
-// Tamanho do incremento nas direções x e y
-// (número de pixels para se mover a cada
-// intervalo de tempo)
 GLfloat xstep = 1.0f;
 GLfloat ystep = 1.0f;
 
-// Largura e altura da janela
-GLfloat windowWidth;
-GLfloat windowHeight;
+GLfloat windowWidth = 1080.0f;
+GLfloat windowHeight = 720.0f;
+
+float ball_x = 0.0f;
+float ball_y = 0.0f;
+
+// Position and size of the bars
+GLfloat barWidth = 12.0f;
+GLfloat barHeight = 120.0f;
+GLfloat bar1_x = 50.0f;
+GLfloat bar1_y = 350.0f;
+GLfloat bar2_x = windowWidth - barWidth - 50.0f;
+GLfloat bar2_y = 350.0f;
+
 
 float x1_ = 50.0f;
 float y1_ = 120.0f;
 float rsize = 28.0f;
 
 
+void DrawBar1(void) {
+   // Draw bar 1
+   glColor3f(0.0f, 0.0f, 0.0f);
+   glBegin(GL_QUADS);
+   glVertex2f(bar1_x, bar1_y);
+   glVertex2f(bar1_x + barWidth, bar1_y);
+   glVertex2f(bar1_x + barWidth, bar1_y + barHeight);
+   glVertex2f(bar1_x, bar1_y + barHeight);
+   glEnd();
+}
+
+void DrawBar2(void) {
+   // Draw bar 2
+   glColor3f(0.0f, 0.0f, 0.0f);
+   glBegin(GL_QUADS);
+   glVertex2f(bar2_x, bar2_y);
+   glVertex2f(bar2_x + barWidth, bar2_y);
+   glVertex2f(bar2_x + barWidth, bar2_y + barHeight);
+   glVertex2f(bar2_x, bar2_y + barHeight);
+   glEnd();
+}
+
+void catchKey(int key, int x, int y)
+{
+
+    if(key == GLUT_KEY_UP){
+        bar1_y += 10.0f;
+    }
+
+    else if(key == GLUT_KEY_DOWN)
+        bar1_y -= 10.0f;
+
+   if (bar1_y < 20) bar1_y = 20;
+   if (bar1_y > windowHeight-rsize- (0.24*windowHeight) - barHeight) bar1_y = windowHeight-rsize- (0.24*windowHeight) - barHeight;
+}
+
+void KeyboardHandler(unsigned char key, int x, int y)
+{
+
+   if (key == 'w' || key == 'W') {
+       // Move the right bar up
+       bar2_y += 10.0f;
+   } else if (key == 's' || key == 'S') {
+       // Move the right bar down
+       bar2_y -= 10.0f;
+   } else if (key == 'i' || key == 'I') {
+       // Move the left bar up
+       bar1_y += 10.0f;
+   } else if (key == 'k' || key == 'K') {
+       // Move the left bar down
+       bar1_y -= 10.0f;
+   }
+
+   if (bar2_y < 20) bar2_y = 20;
+   if (bar2_y > windowHeight-rsize- (0.24*windowHeight) - barHeight) bar2_y = windowHeight-rsize- (0.24*windowHeight) - barHeight;
+}
+
+
+int collided_with_bar(float x_ball, float y_ball) {
+
+    if (y_ball >= bar1_y && y_ball <= (bar1_y + barHeight) && x_ball <= bar1_x + rsize + 5) {
+        return 1;
+    }
+
+    else if (y_ball >= bar2_y && y_ball <= (bar2_y + barHeight) && x_ball >= bar2_x) {
+        return 2;
+    }
+
+    return 0;
+}
+
 void DrawBall(void) {
 
     // Draw a circle
      glColor3f(0.0f, 1.0f, 0.0f);
      glBegin(GL_POLYGON);
+
+     float coordx = 1.0f;
+     float coordy = 1.0f;
+
      for (int i = 0; i < 360; i++)
      {
          float theta = i * 3.14159 / 180;
          float x = x1_ + rsize/2 * cos(theta);
          float y = y1_ + rsize/2 * sin(theta);
+
+         ball_x = x;
+         ball_y = y;
          glVertex2f(x, y);
      }
+
      glEnd();
 }
 
@@ -44,13 +127,11 @@ void DrawBackground(void) {
     // Draw a circle
      glColor3f(1.0f, 0.0f, 0.0f);
 
-     // Desenha um quadrado preenchido com a cor corrente
      glBegin(GL_QUADS);
                glVertex2i(0,0);
                glVertex2i(windowWidth,0);
                glVertex2i(windowWidth,windowHeight);
 
-               // Especifica que a cor corrente é azul
                glColor3f(0.0f, 0.0f, 1.0f);
                glVertex2i(0, windowHeight);
 
@@ -58,29 +139,28 @@ void DrawBackground(void) {
 }
 
 void DrawField(void) {
-    // Draw a circle
+
      glColor3f(1.0f, 1.0f, 1.0f);
 
-     // Desenha um quadrado preenchido com a cor corrente
      glBegin(GL_QUADS);
                glVertex2i(20, 20);
                glVertex2i(50, 520);
                glVertex2i(1030, 520);
 
-               // Especifica que a cor corrente é azul
                glColor3f(0.0f, 0.0f, 1.0f);
                glVertex2i(1060, 20);
 
      glEnd();
 }
 
-// Função callback chamada para fazer o desenho
+
+
 void Desenha(void)
 {
+
      glMatrixMode(GL_MODELVIEW);
      glLoadIdentity();
 
-     // Limpa a janela de visualização com a cor de fundo especificada
      glClear(GL_COLOR_BUFFER_BIT);
 
      glColor3f(1.0f, 0.0f, 0.0f);
@@ -89,60 +169,64 @@ void Desenha(void)
      DrawField();
      DrawBall();
 
-     // Executa os comandos OpenGL
+     DrawBar1();
+     DrawBar2();
+
      glutSwapBuffers();
 }
 
-// Função callback chamada pela GLUT a cada intervalo de tempo
-// (a window não está sendo redimensionada ou movida)
+
 void Timer(int value)
 {
-    // Muda a direção quando chega na borda esquerda ou direita
-      if(x1_> windowWidth-rsize-15 || x1_< 40)
+
+    GLfloat collision = 0.0f;
+
+    if(x1_> windowWidth-rsize-15 || x1_< 40)
             xstep = -xstep;
 
-    // Muda a direção quando chega na borda superior ou inferior
     if(y1_ > windowHeight-rsize- (0.25*windowHeight) || y1_ < 30)
           ystep = -ystep;
 
-    // Verifica as bordas.  Se a window for menor e o
-    // quadrado sair do volume de visualização
-   if(x1_> windowWidth-rsize)
+
+    if(x1_> windowWidth-rsize)
          x1_= windowWidth-rsize-1;
 
-   if(y1_ > windowHeight-rsize)
+    if(y1_ > windowHeight-rsize)
          y1_ = windowHeight-rsize-1;
 
-    // Move o quadrado
-    x1_+= 7*xstep;
+    collision = collided_with_bar(ball_x, ball_y);
+
+    if (collision == 1) {
+        printf("left\n");
+        xstep = -xstep;
+    }
+
+    else if (collision == 2) {
+        printf("right\n");
+        xstep = -xstep;
+    }
+
+    x1_ += 7*xstep;
     y1_ +=7*ystep;
 
-    // Redesenha o quadrado com as novas coordenadas
     glutPostRedisplay();
-    glutTimerFunc(5,Timer, 1);
+    glutTimerFunc(1, Timer, 1);
 }
 
-// Inicializa parâmetros de rendering
 void Inicializa (void)
 {
-    // Define a cor de fundo da janela de visualização como preta
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 }
 
-// Função callback chamada quando o tamanho da janela é alterado
 void AlteraTamanhoJanela(GLsizei w, GLsizei h)
 {
-     // Evita a divisao por zero
      if(h == 0) h = 1;
 
-     // Especifica as dimensões da Viewport
      glViewport(0, 0, w, h);
 
-     // Inicializa o sistema de coordenadas
      glMatrixMode(GL_PROJECTION);
      glLoadIdentity();
 
-     // Estabelece a janela de seleção (left, right, bottom, top)
      if (w <= h)  {
 		windowHeight = 720.0f*h/w;
 		windowWidth = 1080.0f;
@@ -155,16 +239,19 @@ void AlteraTamanhoJanela(GLsizei w, GLsizei h)
      gluOrtho2D(0.0f, windowWidth, 0.0f, windowHeight);
 }
 
-// Programa Principal
 int main(void)
 {
      glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB);
      glutInitWindowSize(1080, 720);
      glutInitWindowPosition(0.0,0.0);
-     glutCreateWindow("Anima");
+     glutCreateWindow("PongParallax");
      glutDisplayFunc(Desenha);
+
+     glutKeyboardFunc(KeyboardHandler);
+     glutSpecialFunc(catchKey);
+
      glutReshapeFunc(AlteraTamanhoJanela);
-     glutTimerFunc(33, Timer, 1);
+     glutTimerFunc(1, Timer, 1);
      Inicializa();
      glutMainLoop();
 }

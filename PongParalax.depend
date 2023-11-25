@@ -233,7 +233,7 @@
 	<_mingw.h>
 	<stddef.h>
 
-1700933394 source:c:\users\paulo\desktop\pongparalax\main.cpp
+1700941972 source:c:\users\paulo\desktop\pongparalax\main.cpp
 	<windows.h>
 	<gl/glut.h>
 	<math.h>
