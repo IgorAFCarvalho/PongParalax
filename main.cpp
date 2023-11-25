@@ -109,12 +109,10 @@ void KeyboardHandler(unsigned char key, int x, int y)
 int check_for_goal(float x_ball, float y_ball) {
 
     if ((y_ball >= goals_center_y - goal_size ) && y_ball <= (goals_center_y + goal_size) && x_ball < bar1_x + rsize - 12) {
-        printf("%f \n", ball_y);
         return 1;
     }
 
     else if ((y_ball >= goals_center_y - goal_size ) && y_ball <= (goals_center_y + goal_size) && x_ball > bar2_x + 12) {
-        printf("%f \n", ball_y);
         return 2;
     }
 
@@ -144,14 +142,16 @@ void DrawBall(void) {
      float coordx = 1.0f;
      float coordy = 1.0f;
 
+     ball_x = x1_;
+     ball_y = y1_;
+
      for (int i = 0; i < 360; i++)
      {
          float theta = i * 3.14159 / 180;
          float x = x1_ + rsize/2 * cos(theta);
          float y = y1_ + rsize/2 * sin(theta);
 
-         ball_x = x;
-         ball_y = y;
+
          glVertex2f(x, y);
      }
 
