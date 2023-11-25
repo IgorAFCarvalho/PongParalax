@@ -19,9 +19,16 @@ GLfloat windowHeight = 720.0f;
 float ball_x = 0.0f;
 float ball_y = 0.0f;
 
+float score_player_left = 0.0f;
+float score_player_right = 0.0f;
+
+float goals_center_y = 250.0f;
+float goal_size = 120.0f;
+
+
 // Position and size of the bars
 GLfloat barWidth = 12.0f;
-GLfloat barHeight = 120.0f;
+GLfloat barHeight = 140.0f;
 GLfloat bar1_x = 50.0f;
 GLfloat bar1_y = 350.0f;
 GLfloat bar2_x = windowWidth - barWidth - 50.0f;
@@ -83,6 +90,18 @@ void loadTextures(){
     printf("1");
     loadTexture = false;
     }
+void delay(int v)
+{
+	glColor3f(1.0f, 1.0f, 0.0f);
+	glRectf(-90.0f, 90.0f, -10.0f, 10.0f);
+	glutPostRedisplay();
+	glutTimerFunc(1000, delay, v);
+}
+
+void reset_ball() {
+    delay(2000);
+    x1_ = windowWidth/2;
+    y1_ = 120.0f;
 }
 
 void DrawBar1(void) {
@@ -142,10 +161,23 @@ void KeyboardHandler(unsigned char key, int x, int y)
    if (bar2_y > windowHeight-rsize- (0.24*windowHeight) - barHeight) bar2_y = windowHeight-rsize- (0.24*windowHeight) - barHeight;
 }
 
+int check_for_goal(float x_ball, float y_ball) {
+
+    if ((y_ball >= goals_center_y - goal_size ) && y_ball <= (goals_center_y + goal_size) && x_ball < bar1_x + rsize - 12) {
+        return 1;
+    }
+
+    else if ((y_ball >= goals_center_y - goal_size ) && y_ball <= (goals_center_y + goal_size) && x_ball > bar2_x + 12) {
+        return 2;
+    }
+
+    return 0;
+
+}
 
 int collided_with_bar(float x_ball, float y_ball) {
 
-    if (y_ball >= bar1_y && y_ball <= (bar1_y + barHeight) && x_ball <= bar1_x + rsize + 5) {
+    if (y_ball >= bar1_y && y_ball <= (bar1_y + barHeight) && x_ball <= bar1_x + rsize) {
         return 1;
     }
 
@@ -165,14 +197,16 @@ void DrawBall(void) {
      float coordx = 1.0f;
      float coordy = 1.0f;
 
+     ball_x = x1_;
+     ball_y = y1_;
+
      for (int i = 0; i < 360; i++)
      {
          float theta = i * 3.14159 / 180;
          float x = x1_ + rsize/2 * cos(theta);
          float y = y1_ + rsize/2 * sin(theta);
 
-         ball_x = x;
-         ball_y = y;
+
          glVertex2f(x, y);
      }
 
@@ -205,9 +239,9 @@ void DrawField(void) {
         glTexCoord2f(1.0f, 1.0f); glVertex2i(1030, 520);
         glTexCoord2f(1.0f, 0.0f); glVertex2i(1060, 20);
 
-        // Define a refletância do material
+        // Define a refletï¿½ncia do material
     glMaterialfv(GL_FRONT,GL_SPECULAR, especularidade);
-    // Define a concentração do brilho
+    // Define a concentraï¿½ï¿½o do brilho
     glMateriali(GL_FRONT,GL_SHININESS,especMaterial);
     glEnd();
     glBindTexture(GL_TEXTURE_2D,0);
@@ -251,6 +285,10 @@ void Timer(int value)
 {
 
     GLfloat collision = 0.0f;
+    GLfloat goal = 0.0f;
+
+    collision = collided_with_bar(ball_x, ball_y);
+    goal = check_for_goal(ball_x, ball_y);
 
     if(x1_> windowWidth-rsize-15 || x1_< 40)
             xstep = -xstep;
@@ -258,48 +296,56 @@ void Timer(int value)
     if(y1_ > windowHeight-rsize- (0.25*windowHeight) || y1_ < 30)
           ystep = -ystep;
 
-
     if(x1_> windowWidth-rsize)
          x1_= windowWidth-rsize-1;
 
     if(y1_ > windowHeight-rsize)
          y1_ = windowHeight-rsize-1;
 
-    collision = collided_with_bar(ball_x, ball_y);
+
+
+    if (goal == 1) {
+        printf("Gol da direita");
+        reset_ball();
+    }
+
+    if (goal == 2) {
+        printf("Gol da esquerda");
+        reset_ball();
+    }
 
     if (collision == 1) {
-        printf("left\n");
         xstep = -xstep;
     }
 
-    else if (collision == 2) {
-        printf("right\n");
+    if (collision == 2) {
         xstep = -xstep;
     }
 
     x1_ += 7*xstep;
-    y1_ +=7*ystep;
+    y1_ += 7*ystep;
 
     glutPostRedisplay();
     glutTimerFunc(1, Timer, 1);
+
 }
 
 void Inicializa (void)
 {
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 
-    // Define os parâmetros da luz de número 0
+    // Define os parï¿½metros da luz de nï¿½mero 0
     glLightModelfv(GL_LIGHT_MODEL_AMBIENT, luzAmbiente);
     glLightfv(GL_LIGHT0, GL_AMBIENT, luzAmbiente);
     glLightfv(GL_LIGHT0, GL_DIFFUSE, luzDifusa );
     //glLightfv(GL_LIGHT0, GL_SPECULAR, luzEspecular );
     glLightfv(GL_LIGHT0, GL_POSITION, posicaoLuz );
 
-    // Habilita a definição da cor do material a partir da cor corrente
+    // Habilita a definiï¿½ï¿½o da cor do material a partir da cor corrente
     glEnable(GL_COLOR_MATERIAL);
-    //Habilita o uso de iluminação
+    //Habilita o uso de iluminaï¿½ï¿½o
     glEnable(GL_LIGHTING);
-    // Habilita a luz de número 0
+    // Habilita a luz de nï¿½mero 0
     glEnable(GL_LIGHT0);
 }
 
