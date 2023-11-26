@@ -37,8 +37,8 @@ GLfloat bar1_y = 350.0f;
 GLfloat bar2_x = windowWidth - barWidth - 50.0f;
 GLfloat bar2_y = 350.0f;
 
-float x1_ = 50.0f;
-float y1_ = 120.0f;
+float x1_ = 540.0f;
+float y1_ = 200.0f;
 float rsize = 28.0f;
 
 GLuint fieldTexture;
@@ -70,6 +70,58 @@ float corBolaB = 1.0f;
 
 int score1 = 0;
 int score2 = 0;
+bool draw_goal = false;
+
+void beginText() {
+   glMatrixMode(GL_PROJECTION);
+   glPushMatrix();
+   glLoadIdentity();
+   gluOrtho2D(0, windowWidth, 0, windowHeight);
+   glMatrixMode(GL_MODELVIEW);
+}
+
+void drawString(float x, float y, float z, char *string) {
+   glPushMatrix();
+   glTranslatef(x, y, z);
+   for (char* c = string; *c != '\0'; c++) {
+       glutStrokeCharacter(GLUT_STROKE_ROMAN, *c);
+   }
+   glPopMatrix();
+}
+
+
+void endText() {
+   glMatrixMode(GL_PROJECTION);
+   glPopMatrix();
+   glMatrixMode(GL_MODELVIEW);
+}
+
+
+void desenhaTexto(float x=0.0f, float y=0.0f) {
+    beginText();
+    if (draw_goal) drawString(x, y, 0, "GOOOL");
+    else {
+        drawString(x, y, 0, "");
+    }
+
+    endText();
+}
+
+void count_to_million() {
+    int res = 0;
+    for (int j=0; j++; j< 1000000) {
+        res += 1;
+        printf("%d", res);
+    }
+}
+
+void goal_text_animation() {
+    for (int i = 0; i < 200; i++) {
+        desenhaTexto(270 + i/10, 200 + i/10);
+        //count_to_million();
+    }
+
+}
 
 void caminhosDinamicos(){
     const char* sourceFilePath = __FILE__;
@@ -90,6 +142,8 @@ void caminhosDinamicos(){
         relativePath.replace(pos, 1, "\\\\");
         pos += 2;  // Move past the replaced double backslash
     }
+
+    std::cout << "Image Path: " << relativePath << std::endl;
 }
 
 GLuint loadImage(const char *imagepath){
@@ -234,12 +288,12 @@ void KeyboardHandler(unsigned char key, int x, int y)
 
 int check_for_goal(float x_ball, float y_ball) {
 
-    if ((y_ball > 100000 ) && y_ball < (goal_top_y) && x_ball < bar1_x + rsize - barWidth) {
+    if ((y_ball > goal_bottom_y ) && y_ball < (goal_top_y) && x_ball < bar1_x + rsize - barWidth) {
         ball_speed = 0.1;
         return 1;
     }
 
-    else if ((y_ball > 100000 ) && y_ball < (goal_top_y) && x_ball > bar2_x + barWidth) {
+    else if ((y_ball > goal_bottom_y ) && y_ball < (goal_top_y) && x_ball > bar2_x + barWidth) {
         ball_speed = 0.1;
         return 2;
     }
@@ -263,7 +317,6 @@ int collided_with_bar(float x_ball, float y_ball) {
 
 void DrawBall(void) {
 
-    // Draw a circle
      glColor3f(corBolaR, corBolaG, corBolaB);
      glBindTexture(GL_TEXTURE_2D,bolaTexture);
      glBegin(GL_POLYGON);
@@ -318,9 +371,7 @@ void DrawField(void) {
         glTexCoord2f(0.0f, 0.0f); glVertex2i(1080, 520);
         glTexCoord2f(0.0f, 1.0f); glVertex2i(1080, 0);
 
-    // Define a reflet�ncia do material
     glMaterialfv(GL_FRONT,GL_SPECULAR, especularidade);
-    // Define a concentra��o do brilho
     glMateriali(GL_FRONT,GL_SHININESS,especMaterial);
     glEnd();
     glBindTexture(GL_TEXTURE_2D,0);
@@ -417,6 +468,8 @@ void Desenha(void)
 
      loadTextures();
 
+     goal_text_animation();
+
      glDisable(GL_TEXTURE_2D);
 
      GLenum error = glGetError();
@@ -453,12 +506,19 @@ void Timer(int value)
 
     if (goal == 1) {
         printf("Gol da direita");
+        draw_goal = true;
+        Desenha();
         reset_ball();
     }
 
-    if (goal == 2) {
+    else if (goal == 2) {
         printf("Gol da esquerda");
+        Desenha();
         reset_ball();
+    }
+
+    else {
+        draw_goal = false;
     }
 
     if (collision == 1) {
@@ -475,8 +535,6 @@ void Timer(int value)
     corBolaG = corBolaG - (ball_speed * abs(xstep)*0.0008);
     corBolaB = corBolaB - (ball_speed * abs(ystep)*0.0008);
 
-    printf("(%f,%f)",corBolaG,corBolaB);
-
     glutPostRedisplay();
     glutTimerFunc(1, Timer, 1);
 
@@ -492,18 +550,13 @@ void Inicializa (void)
 {
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 
-    // Define os par�metros da luz de n�mero 0
     glLightModelfv(GL_LIGHT_MODEL_AMBIENT, luzAmbiente);
     glLightfv(GL_LIGHT0, GL_AMBIENT, luzAmbiente);
     glLightfv(GL_LIGHT0, GL_DIFFUSE, luzDifusa );
-    //glLightfv(GL_LIGHT0, GL_SPECULAR, luzEspecular );
     glLightfv(GL_LIGHT0, GL_POSITION, posicaoLuz );
 
-    // Habilita a defini��o da cor do material a partir da cor corrente
     glEnable(GL_COLOR_MATERIAL);
-    //Habilita o uso de ilumina��o
     glEnable(GL_LIGHTING);
-    // Habilita a luz de n�mero 0
     glEnable(GL_LIGHT0);
 }
 
