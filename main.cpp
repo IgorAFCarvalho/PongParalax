@@ -532,7 +532,6 @@ void Timer(int value)
 
         if (goal == 1) {
             sndPlaySound(goalSoundPath.c_str(), SND_ASYNC);
-            printf("Gol do vermelho\n");
             draw_goal = true;
             score2 +=1;
             Desenha();
@@ -541,7 +540,6 @@ void Timer(int value)
 
         else if (goal == 2) {
             sndPlaySound(goalSoundPath.c_str(), SND_ASYNC);
-            printf("Gol do azul\n");
             draw_goal = true;
             score1 +=1;
             Desenha();
