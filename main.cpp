@@ -9,6 +9,7 @@
 #include <vector>
 
 #define DEFAULT_TIME_INTERVAL 250
+#define DEFAULT_KICK_ACCELERATION 2
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
 
@@ -57,6 +58,7 @@ GLuint bolaTexture;
 
 bool loadTexture = true;
 bool ball_squeezing = false;
+bool ball_was_kicked = false;
 
 float lightX, lightY = 0.0;
 float lightZ = 40;
@@ -287,7 +289,7 @@ void KeyboardHandler(unsigned char key, int x, int y)
 
 int check_for_goal(float x_ball, float y_ball) {
 
-    if ((y_ball > goal_bottom_y ) && y_ball < (goal_top_y) && x_ball < bar1_x + rsize - barWidth) {
+    if ((y_ball > goal_bottom_y ) && y_ball < (goal_top_y) && x_ball < bar1_x - barWidth) {
         ball_speed = 0.1;
         return 1;
     }
@@ -303,11 +305,11 @@ int check_for_goal(float x_ball, float y_ball) {
 
 int collided_with_bar(float x_ball, float y_ball) {
 
-    if (y_ball > bar1_y && y_ball < (bar1_y + barHeight) && x_ball < bar1_x + 15) {
+    if (y_ball > bar1_y - 5 && y_ball < (bar1_y + barHeight + 5) && x_ball < bar1_x + 15) {
         return 1;
     }
 
-    else if (y_ball > bar2_y && y_ball < (bar2_y + barHeight) && x_ball > bar2_x) {
+    else if (y_ball > bar2_y -5 && y_ball < (bar2_y + barHeight + 5) && x_ball > bar2_x) {
         return 2;
     }
 
@@ -517,7 +519,7 @@ void Timer(int value)
          y1_ = windowHeight-rsize-1;
 
     if (goal == 1) {
-        printf("Gol da direita");
+        printf("Gol do vermelho\n");
         draw_goal = true;
         score2 +=1;
         Desenha();
@@ -525,7 +527,7 @@ void Timer(int value)
     }
 
     else if (goal == 2) {
-        printf("Gol da esquerda");
+        printf("Gol do azul\n");
         draw_goal = true;
         score1 +=1;
         Desenha();
@@ -539,14 +541,28 @@ void Timer(int value)
 
     if (collision == 1) {
         xstep = -xstep;
+        ball_was_kicked = true;
     }
 
     if (collision == 2) {
         xstep = -xstep;
+        ball_was_kicked = true;
     }
 
-    x1_ += 7 * ball_speed * xstep;
-    y1_ += 7 * ball_speed * ystep;
+    if (ball_was_kicked) {
+
+        x1_ += 7 * ball_speed * xstep * DEFAULT_KICK_ACCELERATION;
+        y1_ += 7 * ball_speed * ystep * DEFAULT_KICK_ACCELERATION;
+
+    //    DEFAULT_KICK_ACCELERATION
+        ball_was_kicked = false;
+
+    } else {
+        x1_ += 7 * ball_speed * xstep;
+        y1_ += 7 * ball_speed * ystep;
+    }
+
+
 
     corBolaG = corBolaG - (ball_speed * abs(xstep)*0.0008);
     corBolaB = corBolaB - (ball_speed * abs(ystep)*0.0008);
@@ -555,6 +571,7 @@ void Timer(int value)
     glutTimerFunc(1, Timer, 1);
 
     timer = timer + 1;
+
     if (timer % 5 == 0) {
         torcida = !torcida;
     }
