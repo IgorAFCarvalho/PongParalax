@@ -68,6 +68,9 @@ float corBolaR = 1.0f;
 float corBolaG = 1.0f;
 float corBolaB = 1.0f;
 
+int score1 = 0;
+int score2 = 0;
+
 void caminhosDinamicos(){
     const char* sourceFilePath = __FILE__;
     std::string fullPath(sourceFilePath);
@@ -106,10 +109,12 @@ GLuint loadImage(const char *imagepath){
         glGenTextures(1, &textureID);
         glBindTexture(GL_TEXTURE_2D, textureID);
         glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
-        gluBuild2DMipmaps(GL_TEXTURE_2D, GL_RGB, width, height, GL_RGB, GL_UNSIGNED_BYTE, data);
+        gluBuild2DMipmaps(GL_TEXTURE_2D, format, width, height, format, GL_UNSIGNED_BYTE, data);
 
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
+
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
@@ -287,9 +292,10 @@ void DrawBackground(void) {
     glColor3f(1.0f, 1.0f, 1.0f);
 
     if(torcida)
-    glBindTexture(GL_TEXTURE_2D,torcidaTexture1);
+        glBindTexture(GL_TEXTURE_2D,torcidaTexture1);
     else
-    glBindTexture(GL_TEXTURE_2D,torcidaTexture2);
+        glBindTexture(GL_TEXTURE_2D,torcidaTexture2);
+
     glBegin(GL_QUADS);
         glTexCoord2f(1.0f, 1.0f);glVertex2i(0,520);
         glTexCoord2f(0.0f, 1.0f);glVertex2i(windowWidth,520);
@@ -320,6 +326,70 @@ void DrawField(void) {
     glBindTexture(GL_TEXTURE_2D,0);
 }
 
+void DrawScoreBoard(){
+    glColor3f(.0f,0.0f,0.0f);
+
+    glBegin(GL_QUADS);
+        glVertex2i(465,525);
+        glVertex2i(580,525);
+        glVertex2i(580,585);
+        glVertex2i(465,585);
+    glEnd();
+
+}
+
+void DrawScore1(){
+    glColor3f(1.0f, 1.0f, 1.0f);
+    switch(score1) {
+    case 0:
+       glBindTexture(GL_TEXTURE_2D,placar0Texture);
+       break;
+    case 1:
+       glBindTexture(GL_TEXTURE_2D,placar1Texture);
+       break;
+    case 2:
+       glBindTexture(GL_TEXTURE_2D,placar2Texture);
+       break;
+    case 3:
+       glBindTexture(GL_TEXTURE_2D,placar3Texture);
+       break;
+    }
+
+    glBegin(GL_QUADS);
+       glTexCoord2f(0.0f, 1.0f); glVertex2i(475,530);
+       glTexCoord2f(1.0f, 1.0f); glVertex2i(520,530);
+      glTexCoord2f(1.0f, 0.0f);  glVertex2i(520,580);
+      glTexCoord2f(0.0f, 0.0f); glVertex2i(475,580);
+    glEnd();
+    glBindTexture(GL_TEXTURE_2D,0);
+}
+
+void DrawScore2(){
+    glColor3f(1.0f, 1.0f, 1.0f);
+    switch(score2) {
+    case 0:
+       glBindTexture(GL_TEXTURE_2D,placar0Texture);
+       break;
+    case 1:
+       glBindTexture(GL_TEXTURE_2D,placar1Texture);
+       break;
+    case 2:
+       glBindTexture(GL_TEXTURE_2D,placar2Texture);
+       break;
+    case 3:
+       glBindTexture(GL_TEXTURE_2D,placar3Texture);
+       break;
+    }
+
+    glBegin(GL_QUADS);
+      glTexCoord2f(0.0f, 1.0f); glVertex2i(525,530);
+      glTexCoord2f(1.0f, 1.0f); glVertex2i(570,530);
+      glTexCoord2f(1.0f, 0.0f); glVertex2i(570,580);
+      glTexCoord2f(0.0f, 0.0f); glVertex2i(525,580);
+    glEnd();
+    glBindTexture(GL_TEXTURE_2D,0);
+}
+
 
 
 void Desenha(void)
@@ -333,6 +403,10 @@ void Desenha(void)
      glColor3f(1.0f, 0.0f, 0.0f);
 
      DrawBackground();
+
+     DrawScoreBoard();
+     DrawScore1();
+     DrawScore2();
 
      DrawField();
 
