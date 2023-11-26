@@ -1,4 +1,5 @@
 #include <windows.h>
+#include <mmsystem.h>
 #include <gl/glut.h>
 #include <math.h>
 #include <stdio.h>
@@ -69,6 +70,10 @@ GLfloat luzEspecular[4] = {1.0,1.0,1.0,1.0};
 GLfloat posicaoLuz[4] = {lightX, lightY, lightZ, 1.0};
 
 std::string relativePath;
+std::string kickSoundPath;
+std::string freezeSoundPath;
+std::string goalSoundPath;
+std::string apitoSoundPath;
 
 bool torcida;
 int timer = 0;
@@ -80,6 +85,7 @@ float corBolaB = 1.0f;
 int score1 = 0;
 int score2 = 0;
 bool draw_goal = false;
+
 
 
 void beginText() {
@@ -295,7 +301,7 @@ void KeyboardHandler(unsigned char key, int x, int y)
 
 int check_for_goal(float x_ball, float y_ball) {
 
-    if ((y_ball > goal_bottom_y ) && y_ball < (goal_top_y) && x_ball < bar1_x - barWidth) {
+    if ((y_ball > goal_bottom_y ) && y_ball < (goal_top_y) && x_ball < bar1_x + (rsize*0,5) - barWidth) {
         ball_speed = 0.1;
         return 1;
     }
@@ -509,8 +515,6 @@ void Timer(int value)
 
         frame_count += 1;
 
-        //printf("%f \n", frame_count);
-
         collision = collided_with_bar(ball_x, ball_y);
         goal = check_for_goal(ball_x, ball_y);
 
@@ -527,6 +531,7 @@ void Timer(int value)
              y1_ = windowHeight-rsize-1;
 
         if (goal == 1) {
+            sndPlaySound(goalSoundPath.c_str(), SND_ASYNC);
             printf("Gol do vermelho\n");
             draw_goal = true;
             score2 +=1;
@@ -535,6 +540,7 @@ void Timer(int value)
         }
 
         else if (goal == 2) {
+            sndPlaySound(goalSoundPath.c_str(), SND_ASYNC);
             printf("Gol do azul\n");
             draw_goal = true;
             score1 +=1;
@@ -544,17 +550,21 @@ void Timer(int value)
         } else {
 
             if (draw_goal && frame_count > 250) draw_goal = false;
-
         }
 
         if (collision == 1) {
+
+            sndPlaySound(kickSoundPath.c_str(), SND_ASYNC);
             xstep = -xstep;
             ball_was_kicked = true;
+
         }
 
         if (collision == 2) {
+            sndPlaySound(kickSoundPath.c_str(), SND_ASYNC);
             xstep = -xstep;
             ball_was_kicked = true;
+
         }
 
         if (ball_was_kicked) {
@@ -562,7 +572,6 @@ void Timer(int value)
             x1_ += 7 * ball_speed * xstep * DEFAULT_KICK_ACCELERATION;
             y1_ += 7 * ball_speed * ystep * DEFAULT_KICK_ACCELERATION;
 
-        //    DEFAULT_KICK_ACCELERATION
             ball_was_kicked = false;
 
         } else {
@@ -570,15 +579,22 @@ void Timer(int value)
             y1_ += 7 * ball_speed * ystep;
         }
 
+        if (frame_count == 2000) {
+            sndPlaySound(freezeSoundPath.c_str(), SND_ASYNC);
+        }
+
         if (frame_count > 2000 && frame_count < 2500){
+
             ball_speed = 0.1;
             float luzAmbiente[4] = {0.0,1.0,1.0,1.0};
-                glLightModelfv(GL_LIGHT_MODEL_AMBIENT, luzAmbiente);
-                glLightfv(GL_LIGHT0, GL_AMBIENT, luzAmbiente);
-                corBolaR = 1.0;
-                corBolaB = 1.0;
-                corBolaG = 1.0;
+            glLightModelfv(GL_LIGHT_MODEL_AMBIENT, luzAmbiente);
+            glLightfv(GL_LIGHT0, GL_AMBIENT, luzAmbiente);
+            corBolaR = 1.0;
+            corBolaB = 1.0;
+            corBolaG = 1.0;
+
         } else {
+
             float luzAmbiente[4] = {0.5,0.5,0.5,1.0};
             glLightModelfv(GL_LIGHT_MODEL_AMBIENT, luzAmbiente);
             glLightfv(GL_LIGHT0, GL_AMBIENT, luzAmbiente);
@@ -605,6 +621,7 @@ void Timer(int value)
 
      glutPostRedisplay();
      glutTimerFunc(1, Timer, 1);
+
 }
 
 void Inicializa (void)
@@ -645,6 +662,14 @@ void AlteraTamanhoJanela(GLsizei w, GLsizei h)
 int main(void)
 {
      caminhosDinamicos();
+
+     kickSoundPath = relativePath + "kick.wav";
+     freezeSoundPath = relativePath + "freeze.wav";
+     goalSoundPath = relativePath + "goal.wav";
+     apitoSoundPath = relativePath + "apito.wav";
+
+     sndPlaySound(apitoSoundPath.c_str(), SND_ASYNC);
+
      glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB);
      glutInitWindowSize(1080, 720);
      glutInitWindowPosition(0.0,0.0);
