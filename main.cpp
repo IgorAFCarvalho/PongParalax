@@ -124,10 +124,28 @@ void desenhaTexto(float x=0.0f, float y=0.0f) {
     endText();
 }
 
+void desenhaPause(float x=800.0f, float y=50.0f) {
+    beginText();
+
+    if (pause_game) drawString(x, y, 0, "PAUSE");
+    else {
+        drawString(x, y, 0, "");
+    }
+
+    endText();
+}
+
 
 void goal_text_animation() {
     for (int i = 0; i < 200; i++) {
         desenhaTexto(300 + i/10, 250 + i/10);
+    }
+
+}
+
+void goal_text_pause() {
+    for (int i = 0; i < 100; i++) {
+        desenhaPause(600 + i/10, 50 + i/10);
     }
 
 }
@@ -489,6 +507,7 @@ void Desenha(void)
      loadTextures();
 
      goal_text_animation();
+     goal_text_pause();
 
      glDisable(GL_TEXTURE_2D);
 
@@ -533,7 +552,14 @@ void Timer(int value)
         if (goal == 1) {
             sndPlaySound(goalSoundPath.c_str(), SND_ASYNC);
             draw_goal = true;
-            score2 +=1;
+
+            if (score2 < 3) {
+                score2 +=1;
+            } else {
+                score1 = 0;
+                score2 = 0;
+            }
+
             Desenha();
             reset_ball();
         }
@@ -541,7 +567,14 @@ void Timer(int value)
         else if (goal == 2) {
             sndPlaySound(goalSoundPath.c_str(), SND_ASYNC);
             draw_goal = true;
-            score1 +=1;
+
+            if (score1 < 3) {
+                score1 +=1;
+            } else {
+                score1 = 0;
+                score2 = 0;
+            }
+
             Desenha();
             reset_ball();
 
@@ -614,7 +647,9 @@ void Timer(int value)
         ball_speed += 0.0005;
 
     } else {
-        goal_text_animation();
+        float luzAmbiente[4] = {0.2,0.2,0.2,1.0};
+        glLightModelfv(GL_LIGHT_MODEL_AMBIENT, luzAmbiente);
+        glLightfv(GL_LIGHT0, GL_AMBIENT, luzAmbiente);
     }
 
      glutPostRedisplay();
