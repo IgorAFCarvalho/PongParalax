@@ -243,7 +243,7 @@
 	<vector>
 	"stb_image.h"
 
-1700961822 source:c:\workspace\pongparalax\main.cpp
+1700962927 source:c:\workspace\pongparalax\main.cpp
 	<windows.h>
 	<gl/glut.h>
 	<math.h>
@@ -255,7 +255,7 @@
 	<vector>
 	"stb_image.h"
 
-1700955724 c:\program files (x86)\codeblocks\mingw\include\stb_image.h
+1700936853 c:\program files (x86)\codeblocks\mingw\include\stb_image.h
 	"stb_image.h"
 	<stdio.h>
 	<stdlib.h>

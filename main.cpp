@@ -64,6 +64,10 @@ std::string relativePath;
 bool torcida;
 int timer = 0;
 
+float corBolaR = 1.0f;
+float corBolaG = 1.0f;
+float corBolaB = 1.0f;
+
 void caminhosDinamicos(){
     const char* sourceFilePath = __FILE__;
     std::string fullPath(sourceFilePath);
@@ -163,6 +167,10 @@ void reset_ball() {
 
     float x = (float)rand()/(float)(RAND_MAX/100);
 
+    corBolaR = 1.0f;
+    corBolaG = 1.0f;
+    corBolaB = 1.0f;
+
     x1_ = windowWidth/2 - x;
     y1_ = 120.0f;
 }
@@ -221,12 +229,12 @@ void KeyboardHandler(unsigned char key, int x, int y)
 
 int check_for_goal(float x_ball, float y_ball) {
 
-    if ((y_ball > goal_bottom_y ) && y_ball < (goal_top_y) && x_ball < bar1_x + rsize - barWidth) {
+    if ((y_ball > 100000 ) && y_ball < (goal_top_y) && x_ball < bar1_x + rsize - barWidth) {
         ball_speed = 0.1;
         return 1;
     }
 
-    else if ((y_ball > goal_bottom_y ) && y_ball < (goal_top_y) && x_ball > bar2_x + barWidth) {
+    else if ((y_ball > 100000 ) && y_ball < (goal_top_y) && x_ball > bar2_x + barWidth) {
         ball_speed = 0.1;
         return 2;
     }
@@ -251,9 +259,12 @@ int collided_with_bar(float x_ball, float y_ball) {
 void DrawBall(void) {
 
     // Draw a circle
-     glColor3f(1.0f, 0.0f, 0.0f);
+     glColor3f(corBolaR, corBolaG, corBolaB);
      glBindTexture(GL_TEXTURE_2D,bolaTexture);
      glBegin(GL_POLYGON);
+
+     ball_x = x1_;
+     ball_y = y1_;
 
      for (int i = 0; i < 360; i++)
      {
@@ -386,6 +397,11 @@ void Timer(int value)
 
     x1_ += 7 * ball_speed * xstep;
     y1_ += 7 * ball_speed * ystep;
+
+    corBolaG = corBolaG - (ball_speed * abs(xstep)*0.0008);
+    corBolaB = corBolaB - (ball_speed * abs(ystep)*0.0008);
+
+    printf("(%f,%f)",corBolaG,corBolaB);
 
     glutPostRedisplay();
     glutTimerFunc(1, Timer, 1);
