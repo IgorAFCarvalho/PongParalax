@@ -8,6 +8,7 @@
 #include <fstream>
 #include <vector>
 
+#define DEFAULT_TIME_INTERVAL 250
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
 
@@ -19,6 +20,8 @@ GLfloat windowWidth = 1080.0f;
 GLfloat windowHeight = 720.0f;
 
 float ball_speed = 0.1;
+
+float frame_count = 0;
 
 float ball_x = 0.0f;
 float ball_y = 0.0f;
@@ -40,6 +43,8 @@ GLfloat bar2_y = 350.0f;
 float x1_ = 540.0f;
 float y1_ = 200.0f;
 float rsize = 28.0f;
+
+float DEFAULT_TIME = 250.0f;
 
 GLuint fieldTexture;
 GLuint torcidaTexture1;
@@ -105,18 +110,10 @@ void desenhaTexto(float x=0.0f, float y=0.0f) {
     endText();
 }
 
-void count_to_million() {
-    int res = 0;
-    for (int j=0; j++; j< 1000000) {
-        res += 1;
-        printf("%d", res);
-    }
-}
 
 void goal_text_animation() {
     for (int i = 0; i < 200; i++) {
-        desenhaTexto(270 + i/10, 200 + i/10);
-        //count_to_million();
+        desenhaTexto(300 + i/10, 250 + i/10);
     }
 
 }
@@ -218,7 +215,8 @@ void delay(int v)
 }
 
 void reset_ball() {
-    delay(2000);
+
+    frame_count = 0;
 
     float x = (float)rand()/(float)(RAND_MAX/100);
 
@@ -414,6 +412,14 @@ void Timer(int value)
     GLfloat collision = 0.0f;
     GLfloat goal = 0.0f;
 
+    if (frame_count + 1 == INT_MAX) {
+        frame_count = 0;
+    }
+
+    frame_count += 1;
+
+    printf("%f \n", frame_count);
+
     collision = collided_with_bar(ball_x, ball_y);
     goal = check_for_goal(ball_x, ball_y);
 
@@ -440,12 +446,14 @@ void Timer(int value)
 
     else if (goal == 2) {
         printf("Gol da esquerda");
+        draw_goal = true;
         Desenha();
         reset_ball();
-    }
 
-    else {
-        draw_goal = false;
+    } else {
+
+        if (draw_goal && frame_count > 250) draw_goal = false;
+
     }
 
     if (collision == 1) {
