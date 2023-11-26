@@ -233,11 +233,15 @@
 	<_mingw.h>
 	<stddef.h>
 
-1700949935 source:c:\users\paulo\desktop\pongparalax\main.cpp
+1700960786 source:c:\users\paulo\desktop\pongparalax\main.cpp
 	<windows.h>
 	<gl/glut.h>
 	<math.h>
 	<stdio.h>
+	<iostream>
+	<fstream>
+	<vector>
+	"stb_image.h"
 
 1700956444 source:c:\workspace\pongparalax\main.cpp
 	<windows.h>
@@ -249,7 +253,7 @@
 	<vector>
 	"stb_image.h"
 
-1700936853 c:\program files (x86)\codeblocks\mingw\include\stb_image.h
+1700955724 c:\program files (x86)\codeblocks\mingw\include\stb_image.h
 	"stb_image.h"
 	<stdio.h>
 	<stdlib.h>

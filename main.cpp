@@ -16,6 +16,8 @@ GLfloat ystep = 1.0f;
 GLfloat windowWidth = 1080.0f;
 GLfloat windowHeight = 720.0f;
 
+float ball_speed = 0.1;
+
 float ball_x = 0.0f;
 float ball_y = 0.0f;
 
@@ -23,10 +25,9 @@ float score_player_left = 0.0f;
 float score_player_right = 0.0f;
 
 float goals_center_y = 250.0f;
-float goal_size = 120.0f;
+float goal_top_y = 380;
+float goal_bottom_y = 100;
 
-
-// Position and size of the bars
 GLfloat barWidth = 12.0f;
 GLfloat barHeight = 140.0f;
 GLfloat bar1_x = 50.0f;
@@ -44,10 +45,10 @@ bool loadTexture = true;
 
 float lightX, lightY = 0.0;
 float lightZ = 40;
-    GLfloat luzAmbiente[4] = {0.5,0.5,0.5,1.0};
-    GLfloat luzDifusa[4] = {0.7,0.7,0.7,1.0};
-    GLfloat luzEspecular[4] = {1.0,1.0,1.0,1.0};
-    GLfloat posicaoLuz[4] = {lightX, lightY, lightZ, 1.0};
+GLfloat luzAmbiente[4] = {0.5,0.5,0.5,1.0};
+GLfloat luzDifusa[4] = {0.7,0.7,0.7,1.0};
+GLfloat luzEspecular[4] = {1.0,1.0,1.0,1.0};
+GLfloat posicaoLuz[4] = {lightX, lightY, lightZ, 1.0};
 
 GLuint loadImage(const char *imagepath){
     GLuint textureID;
@@ -86,7 +87,7 @@ GLuint loadImage(const char *imagepath){
 
 void loadTextures(){
     if(loadTexture){
-    fieldTexture = loadImage("C:\\Workspace\\PongParalax\\Campo.png");
+    fieldTexture = loadImage("C:\\Users\\Paulo\\Desktop\\PongParalax\\Campo.png");
     printf("1");
     loadTexture = false;
     }
@@ -102,13 +103,15 @@ void delay(int v)
 
 void reset_ball() {
     delay(2000);
-    x1_ = windowWidth/2;
+
+    float x = (float)rand()/(float)(RAND_MAX/100);
+
+    x1_ = windowWidth/2 - x;
     y1_ = 120.0f;
 }
 
 void DrawBar1(void) {
-   // Draw bar 1
-   glColor3f(0.0f, 0.0f, 0.0f);
+   glColor3f(0.0f, 0.0f, 1.0f);
    glBegin(GL_QUADS);
    glVertex2f(bar1_x, bar1_y);
    glVertex2f(bar1_x + barWidth, bar1_y);
@@ -119,7 +122,7 @@ void DrawBar1(void) {
 
 void DrawBar2(void) {
    // Draw bar 2
-   glColor3f(0.0f, 0.0f, 0.0f);
+   glColor3f(1.0f, 0.0f, 0.0f);
    glBegin(GL_QUADS);
    glVertex2f(bar2_x, bar2_y);
    glVertex2f(bar2_x + barWidth, bar2_y);
@@ -132,11 +135,11 @@ void catchKey(int key, int x, int y)
 {
 
     if(key == GLUT_KEY_UP){
-        bar1_y += 10.0f;
+        bar1_y += 15.0f;
     }
 
     else if(key == GLUT_KEY_DOWN)
-        bar1_y -= 10.0f;
+        bar1_y -= 15.0f;
 
    if (bar1_y < 20) bar1_y = 20;
    if (bar1_y > windowHeight-rsize- (0.24*windowHeight) - barHeight) bar1_y = windowHeight-rsize- (0.24*windowHeight) - barHeight;
@@ -146,17 +149,13 @@ void KeyboardHandler(unsigned char key, int x, int y)
 {
 
    if (key == 'w' || key == 'W') {
-       // Move the right bar up
-       bar2_y += 10.0f;
+       bar2_y += 15.0f;
    } else if (key == 's' || key == 'S') {
-       // Move the right bar down
-       bar2_y -= 10.0f;
+       bar2_y -= 15.0f;
    } else if (key == 'i' || key == 'I') {
-       // Move the left bar up
-       bar1_y += 10.0f;
+       bar1_y += 15.0f;
    } else if (key == 'k' || key == 'K') {
-       // Move the left bar down
-       bar1_y -= 10.0f;
+       bar1_y -= 15.0f;
    }
 
    if (bar2_y < 20) bar2_y = 20;
@@ -165,11 +164,15 @@ void KeyboardHandler(unsigned char key, int x, int y)
 
 int check_for_goal(float x_ball, float y_ball) {
 
-    if ((y_ball >= goals_center_y - goal_size ) && y_ball <= (goals_center_y + goal_size) && x_ball < bar1_x + rsize - 12) {
+    printf(" %f \n", ball_y);
+
+    if ((y_ball > goal_bottom_y ) && y_ball < (goal_top_y) && x_ball < bar1_x + rsize - barWidth) {
+        ball_speed = 0.1;
         return 1;
     }
 
-    else if ((y_ball >= goals_center_y - goal_size ) && y_ball <= (goals_center_y + goal_size) && x_ball > bar2_x + 12) {
+    else if ((y_ball > goal_bottom_y ) && y_ball < (goal_top_y) && x_ball > bar2_x + barWidth) {
+        ball_speed = 0.1;
         return 2;
     }
 
@@ -179,11 +182,11 @@ int check_for_goal(float x_ball, float y_ball) {
 
 int collided_with_bar(float x_ball, float y_ball) {
 
-    if (y_ball >= bar1_y && y_ball <= (bar1_y + barHeight) && x_ball <= bar1_x + rsize) {
+    if (y_ball > bar1_y && y_ball < (bar1_y + barHeight) && x_ball < bar1_x + 15) {
         return 1;
     }
 
-    else if (y_ball >= bar2_y && y_ball <= (bar2_y + barHeight) && x_ball >= bar2_x) {
+    else if (y_ball > bar2_y && y_ball < (bar2_y + barHeight) && x_ball > bar2_x) {
         return 2;
     }
 
@@ -324,11 +327,13 @@ void Timer(int value)
         xstep = -xstep;
     }
 
-    x1_ += 7*xstep;
-    y1_ += 7*ystep;
+    x1_ += 7 * ball_speed * xstep;
+    y1_ += 7 * ball_speed * ystep;
 
     glutPostRedisplay();
     glutTimerFunc(1, Timer, 1);
+
+    ball_speed += 0.0005;
 
 }
 
