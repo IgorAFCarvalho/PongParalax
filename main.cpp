@@ -56,6 +56,7 @@ GLuint placar3Texture;
 GLuint bolaTexture;
 
 bool loadTexture = true;
+bool ball_squeezing = false;
 
 float lightX, lightY = 0.0;
 float lightZ = 40;
@@ -322,6 +323,13 @@ void DrawBall(void) {
      ball_x = x1_;
      ball_y = y1_;
 
+     if (ball_squeezing)  {
+            rsize = 20.0f;
+            ball_squeezing = false;
+     } else {
+        rsize = 28.0f;
+     }
+
      for (int i = 0; i < 360; i++)
      {
         float theta = i * 3.14159 / 180;
@@ -508,11 +516,10 @@ void Timer(int value)
     if(y1_ > windowHeight-rsize)
          y1_ = windowHeight-rsize-1;
 
-
-
     if (goal == 1) {
         printf("Gol da direita");
         draw_goal = true;
+        score2 +=1;
         Desenha();
         reset_ball();
     }
@@ -520,6 +527,7 @@ void Timer(int value)
     else if (goal == 2) {
         printf("Gol da esquerda");
         draw_goal = true;
+        score1 +=1;
         Desenha();
         reset_ball();
 
