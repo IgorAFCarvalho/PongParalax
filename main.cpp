@@ -3,6 +3,8 @@
 #include <math.h>
 #include <stdio.h>
 #include <iostream>
+#include <string>
+#include <unistd.h>
 #include <fstream>
 #include <vector>
 
@@ -39,6 +41,13 @@ float y1_ = 120.0f;
 float rsize = 28.0f;
 
 GLuint fieldTexture;
+GLuint torcidaTexture1;
+GLuint torcidaTexture2;
+GLuint placar0Texture;
+GLuint placar1Texture;
+GLuint placar2Texture;
+GLuint placar3Texture;
+GLuint bolaTexture;
 
 bool loadTexture = true;
 
@@ -48,6 +57,32 @@ float lightZ = 40;
     GLfloat luzDifusa[4] = {0.7,0.7,0.7,1.0};
     GLfloat luzEspecular[4] = {1.0,1.0,1.0,1.0};
     GLfloat posicaoLuz[4] = {lightX, lightY, lightZ, 1.0};
+
+std::string relativePath;
+
+bool torcida;
+int timer = 0;
+
+void caminhosDinamicos(){
+    const char* sourceFilePath = __FILE__;
+    std::string fullPath(sourceFilePath);
+
+    // Extract the directory of the source file
+    size_t lastSlash = fullPath.rfind('/');
+    relativePath = fullPath.substr(0, lastSlash);
+
+    // Remove the main.cpp part from the current path
+    size_t mainPos = relativePath.rfind("\main.cpp");
+    if (mainPos != std::string::npos) {
+        relativePath = relativePath.substr(0, mainPos);
+    }
+
+    size_t pos = 0;
+    while ((pos = relativePath.find("\\", pos)) != std::string::npos) {
+        relativePath.replace(pos, 1, "\\\\");
+        pos += 2;  // Move past the replaced double backslash
+    }
+}
 
 GLuint loadImage(const char *imagepath){
     GLuint textureID;
@@ -70,7 +105,7 @@ GLuint loadImage(const char *imagepath){
 
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
         stbi_image_free(data);
@@ -86,8 +121,30 @@ GLuint loadImage(const char *imagepath){
 
 void loadTextures(){
     if(loadTexture){
-    fieldTexture = loadImage("C:\\Workspace\\PongParalax\\Campo.png");
-    printf("1");
+    std::string  fieldTexturePath = relativePath + "Campo.png";
+    fieldTexture = loadImage(fieldTexturePath.c_str());
+
+    std::string torcidaTexture1Path = relativePath + "torcida1.png";
+    torcidaTexture1 = loadImage(torcidaTexture1Path.c_str());
+
+    std::string torcidaTexture2Path = relativePath + "torcida2.png";
+    torcidaTexture2 = loadImage(torcidaTexture2Path.c_str());
+
+    std::string placar0TexturePath = relativePath + "zero64x64.png";
+    placar0Texture = loadImage(placar0TexturePath.c_str());
+
+    std::string placar1TexturePath = relativePath + "um64x64.png";
+    placar1Texture = loadImage(placar1TexturePath.c_str());
+
+    std::string placar2TexturePath = relativePath + "dois64x64.png";
+    placar2Texture = loadImage(placar2TexturePath.c_str());
+
+    std::string placar3TexturePath = relativePath + "tres64x64.png";
+    placar3Texture = loadImage(placar3TexturePath.c_str());
+
+    std::string bolaTexturePath = relativePath + "bola64x64.png";
+    bolaTexture = loadImage(bolaTexturePath.c_str());
+
     loadTexture = false;
     }
 }
@@ -193,46 +250,48 @@ int collided_with_bar(float x_ball, float y_ball) {
 void DrawBall(void) {
 
     // Draw a circle
-     glColor3f(0.0f, 1.0f, 0.0f);
+     glColor3f(1.0f, 0.0f, 0.0f);
+     glBindTexture(GL_TEXTURE_2D,bolaTexture);
      glBegin(GL_POLYGON);
-
-     float coordx = 1.0f;
-     float coordy = 1.0f;
-
-     ball_x = x1_;
-     ball_y = y1_;
 
      for (int i = 0; i < 360; i++)
      {
-         float theta = i * 3.14159 / 180;
-         float x = x1_ + rsize/2 * cos(theta);
-         float y = y1_ + rsize/2 * sin(theta);
+        float theta = i * 3.14159 / 180;
+        float x = x1_ + rsize/2 * cos(theta);
+        float y = y1_ + rsize/2 * sin(theta);
 
+        float u = 0.5 + cos(theta)/2;
+        float v = 0.5 - sin(theta)/2;
 
-         glVertex2f(x, y);
+        glTexCoord2f(u, v);
+        glVertex2f(x, y);
      }
 
      glEnd();
+     glBindTexture(GL_TEXTURE_2D,0);
 }
 
 void DrawBackground(void) {
-     glColor3f(1.0f, 0.0f, 0.0f);
+    glColor3f(1.0f, 1.0f, 1.0f);
 
-     glBegin(GL_QUADS);
-               glVertex2i(0,0);
-               glVertex2i(windowWidth,0);
-               glVertex2i(windowWidth,windowHeight);
-
-               glColor3f(0.0f, 0.0f, 1.0f);
-               glVertex2i(0, windowHeight);
-
-     glEnd();
+    if(torcida)
+    glBindTexture(GL_TEXTURE_2D,torcidaTexture1);
+    else
+    glBindTexture(GL_TEXTURE_2D,torcidaTexture2);
+    glBegin(GL_QUADS);
+        glTexCoord2f(1.0f, 1.0f);glVertex2i(0,520);
+        glTexCoord2f(0.0f, 1.0f);glVertex2i(windowWidth,520);
+        glTexCoord2f(0.0f, 0.0f);glVertex2i(windowWidth,windowHeight);
+        glTexCoord2f(1.0f, 0.0f);glVertex2i(0, windowHeight);
+    glEnd();
+    glBindTexture(GL_TEXTURE_2D,0);
 }
 
 void DrawField(void) {
     glColor3f(1.0f, 1.0f, 1.0f);
     GLfloat especularidade[4]={1.0,1.0,1.0,1.0};
     GLint especMaterial = 60;
+
     glBindTexture(GL_TEXTURE_2D,fieldTexture);
 
     glBegin(GL_QUADS);
@@ -270,14 +329,14 @@ void Desenha(void)
      DrawBar1();
      DrawBar2();
 
+     loadTextures();
+
      glDisable(GL_TEXTURE_2D);
 
      GLenum error = glGetError();
     if (error != GL_NO_ERROR) {
         printf("OpenGL error: %s\n", gluErrorString(error));
     }
-
-    loadTextures();
 
      glutSwapBuffers();
 }
@@ -330,6 +389,11 @@ void Timer(int value)
     glutPostRedisplay();
     glutTimerFunc(1, Timer, 1);
 
+    timer = timer + 1;
+    if (timer % 5 == 0) {
+        torcida = !torcida;
+    }
+
 }
 
 void Inicializa (void)
@@ -374,6 +438,7 @@ void AlteraTamanhoJanela(GLsizei w, GLsizei h)
 
 int main(void)
 {
+     caminhosDinamicos();
      glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB);
      glutInitWindowSize(1080, 720);
      glutInitWindowPosition(0.0,0.0);

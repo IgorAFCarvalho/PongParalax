@@ -239,12 +239,14 @@
 	<math.h>
 	<stdio.h>
 
-1700956444 source:c:\workspace\pongparalax\main.cpp
+1700961822 source:c:\workspace\pongparalax\main.cpp
 	<windows.h>
 	<gl/glut.h>
 	<math.h>
 	<stdio.h>
 	<iostream>
+	<string>
+	<unistd.h>
 	<fstream>
 	<vector>
 	"stb_image.h"
@@ -274,4 +276,22 @@
 
 1341006776 c:\program files (x86)\codeblocks\mingw\include\stdint.h
 	<stddef.h>
+
+1341006776 c:\program files (x86)\codeblocks\mingw\include\unistd.h
+	<io.h>
+	<process.h>
+	<getopt.h>
+	<sys/types.h>
+
+1341006774 c:\program files (x86)\codeblocks\mingw\include\io.h
+	<_mingw.h>
+	<sys/types.h>
+
+1341006774 c:\program files (x86)\codeblocks\mingw\include\process.h
+	<_mingw.h>
+	<sys/types.h>
+	<stdint.h>
+
+1341006772 c:\program files (x86)\codeblocks\mingw\include\getopt.h
+	<_mingw.h>
 
