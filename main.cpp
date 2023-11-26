@@ -88,7 +88,6 @@ GLuint loadImage(const char *imagepath){
 void loadTextures(){
     if(loadTexture){
     fieldTexture = loadImage("C:\\Users\\Paulo\\Desktop\\PongParalax\\Campo.png");
-    printf("1");
     loadTexture = false;
     }
 }
@@ -163,8 +162,6 @@ void KeyboardHandler(unsigned char key, int x, int y)
 }
 
 int check_for_goal(float x_ball, float y_ball) {
-
-    printf(" %f \n", ball_y);
 
     if ((y_ball > goal_bottom_y ) && y_ball < (goal_top_y) && x_ball < bar1_x + rsize - barWidth) {
         ball_speed = 0.1;
