@@ -31,7 +31,7 @@ float score_player_left = 0.0f;
 float score_player_right = 0.0f;
 
 float goals_center_y = 250.0f;
-float goal_top_y = 380;
+float goal_top_y = 400;
 float goal_bottom_y = 100;
 
 GLfloat barWidth = 12.0f;
@@ -59,6 +59,7 @@ GLuint bolaTexture;
 bool loadTexture = true;
 bool ball_squeezing = false;
 bool ball_was_kicked = false;
+bool pause_game = false;
 
 float lightX, lightY = 0.0;
 float lightZ = 40;
@@ -79,6 +80,7 @@ float corBolaB = 1.0f;
 int score1 = 0;
 int score2 = 0;
 bool draw_goal = false;
+
 
 void beginText() {
    glMatrixMode(GL_PROJECTION);
@@ -107,6 +109,7 @@ void endText() {
 
 void desenhaTexto(float x=0.0f, float y=0.0f) {
     beginText();
+
     if (draw_goal) drawString(x, y, 0, "GOOOL");
     else {
         drawString(x, y, 0, "");
@@ -122,6 +125,7 @@ void goal_text_animation() {
     }
 
 }
+
 
 void caminhosDinamicos(){
     const char* sourceFilePath = __FILE__;
@@ -281,6 +285,8 @@ void KeyboardHandler(unsigned char key, int x, int y)
        bar1_y += 15.0f;
    } else if (key == 'k' || key == 'K') {
        bar1_y -= 15.0f;
+   } else if (key == 27) {
+        pause_game = !pause_game;
    }
 
    if (bar2_y < 20) bar2_y = 20;
@@ -495,88 +501,110 @@ void Timer(int value)
     GLfloat collision = 0.0f;
     GLfloat goal = 0.0f;
 
-    if (frame_count + 1 == INT_MAX) {
-        frame_count = 0;
-    }
+    if (!pause_game) {
 
-    frame_count += 1;
+        if (frame_count + 1 == INT_MAX) {
+            frame_count = 0;
+        }
 
-    printf("%f \n", frame_count);
+        frame_count += 1;
 
-    collision = collided_with_bar(ball_x, ball_y);
-    goal = check_for_goal(ball_x, ball_y);
+        //printf("%f \n", frame_count);
 
-    if(x1_> windowWidth-rsize-15 || x1_< 40)
+        collision = collided_with_bar(ball_x, ball_y);
+        goal = check_for_goal(ball_x, ball_y);
+
+        if(x1_> windowWidth-rsize-15 || x1_< 40)
+                xstep = -xstep;
+
+        if(y1_ > windowHeight-rsize- (0.25*windowHeight) || y1_ < 30)
+              ystep = -ystep;
+
+        if(x1_> windowWidth-rsize)
+             x1_= windowWidth-rsize-1;
+
+        if(y1_ > windowHeight-rsize)
+             y1_ = windowHeight-rsize-1;
+
+        if (goal == 1) {
+            printf("Gol do vermelho\n");
+            draw_goal = true;
+            score2 +=1;
+            Desenha();
+            reset_ball();
+        }
+
+        else if (goal == 2) {
+            printf("Gol do azul\n");
+            draw_goal = true;
+            score1 +=1;
+            Desenha();
+            reset_ball();
+
+        } else {
+
+            if (draw_goal && frame_count > 250) draw_goal = false;
+
+        }
+
+        if (collision == 1) {
             xstep = -xstep;
+            ball_was_kicked = true;
+        }
 
-    if(y1_ > windowHeight-rsize- (0.25*windowHeight) || y1_ < 30)
-          ystep = -ystep;
+        if (collision == 2) {
+            xstep = -xstep;
+            ball_was_kicked = true;
+        }
 
-    if(x1_> windowWidth-rsize)
-         x1_= windowWidth-rsize-1;
+        if (ball_was_kicked) {
 
-    if(y1_ > windowHeight-rsize)
-         y1_ = windowHeight-rsize-1;
+            x1_ += 7 * ball_speed * xstep * DEFAULT_KICK_ACCELERATION;
+            y1_ += 7 * ball_speed * ystep * DEFAULT_KICK_ACCELERATION;
 
-    if (goal == 1) {
-        printf("Gol do vermelho\n");
-        draw_goal = true;
-        score2 +=1;
-        Desenha();
-        reset_ball();
-    }
+        //    DEFAULT_KICK_ACCELERATION
+            ball_was_kicked = false;
 
-    else if (goal == 2) {
-        printf("Gol do azul\n");
-        draw_goal = true;
-        score1 +=1;
-        Desenha();
-        reset_ball();
+        } else {
+            x1_ += 7 * ball_speed * xstep;
+            y1_ += 7 * ball_speed * ystep;
+        }
+
+        if (frame_count > 2000 && frame_count < 2500){
+            ball_speed = 0.1;
+            float luzAmbiente[4] = {0.0,1.0,1.0,1.0};
+                glLightModelfv(GL_LIGHT_MODEL_AMBIENT, luzAmbiente);
+                glLightfv(GL_LIGHT0, GL_AMBIENT, luzAmbiente);
+                corBolaR = 1.0;
+                corBolaB = 1.0;
+                corBolaG = 1.0;
+        } else {
+            float luzAmbiente[4] = {0.5,0.5,0.5,1.0};
+            glLightModelfv(GL_LIGHT_MODEL_AMBIENT, luzAmbiente);
+            glLightfv(GL_LIGHT0, GL_AMBIENT, luzAmbiente);
+        }
+        if(frame_count == 2500){
+            corBolaR = 1.0;
+            corBolaG = 1.0;
+            corBolaB = 1.0;
+        }
+
+        corBolaG = corBolaG - (ball_speed * abs(xstep)*0.0008);
+        corBolaB = corBolaB - (ball_speed * abs(ystep)*0.0008);
+
+        timer = timer + 1;
+
+        if (timer % 5 == 0) {
+            torcida = !torcida;
+        }
+        ball_speed += 0.0005;
 
     } else {
-
-        if (draw_goal && frame_count > 250) draw_goal = false;
-
+        goal_text_animation();
     }
 
-    if (collision == 1) {
-        xstep = -xstep;
-        ball_was_kicked = true;
-    }
-
-    if (collision == 2) {
-        xstep = -xstep;
-        ball_was_kicked = true;
-    }
-
-    if (ball_was_kicked) {
-
-        x1_ += 7 * ball_speed * xstep * DEFAULT_KICK_ACCELERATION;
-        y1_ += 7 * ball_speed * ystep * DEFAULT_KICK_ACCELERATION;
-
-    //    DEFAULT_KICK_ACCELERATION
-        ball_was_kicked = false;
-
-    } else {
-        x1_ += 7 * ball_speed * xstep;
-        y1_ += 7 * ball_speed * ystep;
-    }
-
-
-
-    corBolaG = corBolaG - (ball_speed * abs(xstep)*0.0008);
-    corBolaB = corBolaB - (ball_speed * abs(ystep)*0.0008);
-
-    glutPostRedisplay();
-    glutTimerFunc(1, Timer, 1);
-
-    timer = timer + 1;
-
-    if (timer % 5 == 0) {
-        torcida = !torcida;
-    }
-    ball_speed += 0.0005;
-
+     glutPostRedisplay();
+     glutTimerFunc(1, Timer, 1);
 }
 
 void Inicializa (void)
